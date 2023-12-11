@@ -22,3 +22,4 @@ az aks create \
 # az role assignment create --role contributor --subscription $subscriptionId --assignee-object-id  $assigneeObjectId --assignee-principal-type ServicePrincipal --scope /subscriptions/$subscriptionId/resourceGroups/$resourceGroupName
 
 # az ad sp create-for-rbac --name "ghActionMsolAI" --scope /subscriptions/$subscriptionId/resourceGroups/$resourceGroupName --role Contributor --sdk-auth
+az aks get-credentials --resource-group msol-ai-dev-rg --name dev-msol-ai-aks01
