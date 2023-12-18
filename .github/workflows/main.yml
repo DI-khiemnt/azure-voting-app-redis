@@ -19,7 +19,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ${{ secrets.repository }}/azure-vote-front
+            azure-vote-front
           tags: |
             type=ref,event=branch
             type=ref,event=pr
