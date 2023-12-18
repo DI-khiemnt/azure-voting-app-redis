@@ -18,46 +18,43 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
+          images: |
+            ${{ secrets.repository }}/azure-vote-front
           tags: |
             type=ref,event=branch
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=sha
-      # - name: Login to DockerHub
-      #   # if: github.event_name != 'pull_request'
-      #   uses: azure/docker-login@v1
-      #   with:
-      #     login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
-      #     username: ${{ secrets.REGISTRY_USERNAME }}
-      #     password: ${{ secrets.REGISTRY_PASSWORD }}
-
-      # - name: Build and push
-      #   uses: docker/build-push-action@v5
-      #   with:
-      #     context: .
-      #     push: ${{ github.event_name != 'pull_request' }}
-      #     tags: ${{ steps.meta.outputs.tags }}
-      #     labels: ${{ steps.meta.outputs.labels }}
-      - name: Azure login
-        id: login
-        uses: azure/login@v1.4.3
+      - name: Login to DockerHub
+        # if: github.event_name != 'pull_request'
+        uses: azure/docker-login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
 
-      - name: ACR build
-        id: build-push-acr
-        uses: azure/acr-build@v1
+      - name: Build and push
+        uses: docker/build-push-action@v5
         with:
-          service_principal: ${{ secrets.service_principal }}
-          service_principal_password: ${{ secrets.service_principal_password }}
-          tenant: ${{ secrets.tenant }}
-          registry: ${{ secrets.registry }}
-          repository: ${{ secrets.repository }}
-          image: azure-vote-front
-          folder: azure-vote
-          branch: master
-          tag: ${{ steps.meta.outputs.tags }}
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      # - name: ACR build
+      #   id: build-push-acr
+      #   uses: azure/acr-build@v1
+      #   with:
+      #     service_principal: ${{ secrets.service_principal }}
+      #     service_principal_password: ${{ secrets.service_principal_password }}
+      #     tenant: ${{ secrets.tenant }}
+      #     registry: ${{ secrets.registry }}
+      #     repository: ${{ secrets.repository }}
+      #     image: azure-vote-front
+      #     folder: azure-vote
+      #     branch: master
+      #     tag: ${{ steps.meta.outputs.tags }}
       # - name: Azure login
       #   id: login
       #   uses: azure/login@v1.4.3
