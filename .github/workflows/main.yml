@@ -40,7 +40,6 @@ jobs:
           context: ./azure-vote
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            # ${{ steps.meta.outputs.tags }}
             ${{ secrets.registry }}/${{ secrets.repository }}/azure-vote-front:${{ github.sha }}
           labels: ${{ steps.meta.outputs.labels }}
           file: ./azure-vote/Dockerfile
