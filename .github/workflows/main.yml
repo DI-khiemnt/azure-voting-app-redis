@@ -14,17 +14,12 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
-      - name: Azure login
-        id: login
-        uses: azure/login@v1.4.3
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: |
-            ${{ secrets.registry }}/${{ secrets.repository }}/azure-vote-front
+            ${{ secrets.registry_login_server }}/${{ secrets.repository }}/azure-vote-front
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -45,7 +40,7 @@ jobs:
           context: ./azure-vote
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            ${{ secrets.registry }}/azure-vote-front:${{ github.sha }}
+            ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           file: ./azure-vote/Dockerfile
 
@@ -62,7 +57,11 @@ jobs:
       #     folder: azure-vote
       #     branch: master
       #     tag: ${{ steps.meta.outputs.tags }}
-
+      # - name: Azure login
+      #   id: login
+      #   uses: azure/login@v1.4.3
+      #   with:
+      #     creds: ${{ secrets.AZURE_CREDENTIALS }}
       # - name: Set AKS context
       #   id: set-context
       #   uses: azure/aks-set-context@v3
