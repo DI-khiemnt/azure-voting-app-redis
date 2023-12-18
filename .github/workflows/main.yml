@@ -3,8 +3,10 @@ on:
   push:
     branches:
       - "master"
+      - "releases/**"
     tags:
       - "v*"
+      - "*.*"
   pull_request:
     branches:
       - "master"
@@ -26,8 +28,9 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=sha
+            type=raw,value=latest,enable={{is_default_branch}}
       - name: Login to DockerHub
-        # if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request'
         uses: azure/docker-login@v1
         with:
           login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
@@ -44,44 +47,31 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           file: ./azure-vote/Dockerfile
 
-      # - name: ACR build
-      #   id: build-push-acr
-      #   uses: azure/acr-build@v1
-      #   with:
-      #     service_principal: ${{ secrets.service_principal }}
-      #     service_principal_password: ${{ secrets.service_principal_password }}
-      #     tenant: ${{ secrets.tenant }}
-      #     registry: ${{ secrets.registry }}
-      #     repository: ${{ secrets.repository }}
-      #     image: azure-vote-front
-      #     folder: azure-vote
-      #     branch: master
-      #     tag: ${{ steps.meta.outputs.tags }}
-      # - name: Azure login
-      #   id: login
-      #   uses: azure/login@v1.4.3
-      #   with:
-      #     creds: ${{ secrets.AZURE_CREDENTIALS }}
-      # - name: Set AKS context
-      #   id: set-context
-      #   uses: azure/aks-set-context@v3
-      #   with:
-      #     resource-group: "${{ secrets.resource_group }}"
-      #     cluster-name: "${{ secrets.cluster_name }}"
-      # - name: Setup kubectl
-      #   id: install-kubectl
-      #   uses: azure/setup-kubectl@v3
-      # - name: Deploy to AKS
-      #   id: deploy-aks
-      #   uses: Azure/k8s-deploy@v4
-      #   with:
-      #     resource-group: "${{ secrets.resource_group }}"
-      #     name: "${{ secrets.cluster_name }}"
-      #     action: deploy
-      #     strategy: basic
-      #     private-cluster: true
-      #     namespace: "development"
-      #     manifests: |
-      #       azure-vote-all-in-one-redis.yaml
-      #     images: "${{ secrets.registry }}.azurecr.io/${{ secrets.repository }}/azure-vote-front:${{ github.sha }}"
-      #     pull-images: false
+      - name: Azure login
+        id: login
+        uses: azure/login@v1.4.3
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Set AKS context
+        id: set-context
+        uses: azure/aks-set-context@v3
+        with:
+          resource-group: "${{ secrets.resource_group }}"
+          cluster-name: "${{ secrets.cluster_name }}"
+      - name: Setup kubectl
+        id: install-kubectl
+        uses: azure/setup-kubectl@v3
+      - name: Deploy to AKS
+        id: deploy-aks
+        uses: Azure/k8s-deploy@v4
+        with:
+          resource-group: "${{ secrets.resource_group }}"
+          name: "${{ secrets.cluster_name }}"
+          action: deploy
+          strategy: basic
+          private-cluster: true
+          namespace: "development"
+          manifests: |
+            azure-vote-all-in-one-redis.yaml
+          images: "${{ secrets.registry }}.azurecr.io/${{ secrets.repository }}/azure-vote-front:${{ github.sha }}"
+          pull-images: false
